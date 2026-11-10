@@ -1,0 +1,12 @@
+vex-archive.tar.zst
+vex-archive.tar.zst.asc
+*.json
+!**/package*.json
+result.csv
+current.txt
+future.txt
+__pycache__/
+.venv/
+venv/
+*.pyc
+.DS_Store
