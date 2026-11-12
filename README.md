@@ -1,6 +1,6 @@
 # vex_upgrade_cves
 
-Compare two `rpm -qa` lists against the Red Hat **vex-feed** archive and list CVEs that become fixed when moving from CURRENT → FUTURE.
+Compare two RPM package inventories against the Red Hat **vex-feed** archive and list CVEs that become fixed when moving from **CURRENT → FUTURE**.
 
 ## Setup
 
@@ -10,11 +10,11 @@ pip install -r requirements.txt
 # dnf install python3-rpm
 ```
 
-## Usage
+## Quick start
 
 ```bash
 rpm -qa --qf '%{NEVRA}\n' > current.txt
-# future.txt = target NVRs (image, mirror, planned upgrade set)
+# future.txt = post-change inventory (see docs/usecases.md)
 python3 vex_upgrade_cves.py \
   --current current.txt \
   --future future.txt \
@@ -26,16 +26,26 @@ First run downloads ~900MB from:
 
 `https://security.access.redhat.com/data/csaf/v2/vex-feed/vex-archive.tar.zst`
 
-Faster (no archive): point at already extracted / year tree:
+Or use an already extracted tree:
 
 ```bash
 python3 vex_upgrade_cves.py \
   --current current.txt --future future.txt \
-  --vex-dir /path/to/vex-feed/2026 \
+  --vex-dir /path/to/vex-feed \
   -o result.csv
 ```
 
 `--product-prefix rhel-` (default) keeps only RHEL product_ids. Use `''` for all products.
+
+## Use cases
+
+Step-by-step guides:
+
+**[docs/usecases.md](docs/usecases.md)**
+
+1. **Host before/after update** — `rpm -qa` → update → `rpm -qa`, document CVEs fixed  
+2. **Repository before/after sync** — `dnf repoquery` snapshots around a mirror/content-view update  
+3. **Preview `dnf update`** — installed host vs would-be set after upgrades from a repo (no apply)
 
 ## Result
 
@@ -47,5 +57,6 @@ Each row = CVE + package fixed by FUTURE but not by CURRENT:
 
 ## Notes
 
+- Prefer **NEVRA** lines (`Name-Epoch:Version-Release.Arch`). See [docs/usecases.md](docs/usecases.md).
 - VEX **known_affected** entries have no NVR; this tool only uses **fixed** versioned refs.
 - Dist-tag gate (`.el8` / `.el9` / `.el10`) avoids applying wrong-stream fixes.
