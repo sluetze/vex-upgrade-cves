@@ -170,7 +170,7 @@ python3 vex_upgrade_cves.py \
 
 ---
 
-## 7. Satellite content view version A → B
+## 4. Satellite content view version A → B
 
 **Goal:** Document CVEs fixed when promoting or comparing two **Content View** versions (or Library → CV, or CV → Composite).
 
@@ -233,11 +233,11 @@ python3 vex_upgrade_cves.py \
 
 - Compare the **same** repos/arches in both versions (BaseOS+AppStream, same major).
 - Library sync alone ≠ CV promote: hosts only see what the CV version publishes.
-- Pair with use case 9 to gate promotion in automation.
+- Pair with use case 6 to gate promotion in automation.
 
 ---
 
-## 8. EUS / AUS (and similar) streams only
+## 5. EUS / AUS (and similar) streams only
 
 **Goal:** Limit analysis to Extended Update Support, Advanced Update Support, or another pinned stream so GA/mainline fixes do not pollute the report.
 
@@ -293,7 +293,7 @@ python3 vex_upgrade_cves.py \
 
 ---
 
-## 9. CI gate (fail if required CVEs are not fixed by FUTURE)
+## 6. CI gate (fail if required CVEs are not fixed by FUTURE)
 
 **Goal:** In automation (CV promote, image rebuild, nightly repo sync), fail the pipeline unless FUTURE closes an expected set of CVEs — especially Critical/Important.
 
@@ -391,8 +391,8 @@ jobs:
 **Tips:**
 
 - Cache `vex-archive.tar.zst` in CI (large download).
-- Combine with use case 7: CURRENT/FUTURE = two Satellite CV versions.
-- Combine with use case 8: add `--product-prefix 'rhel-9.4.0.z.eus'` in the CI job.
+- Combine with use case 4: CURRENT/FUTURE = two Satellite CV versions.
+- Combine with use case 5: add `--product-prefix 'rhel-9.4.0.z.eus'` in the CI job.
 - Policy list (`required-cves.txt`) should be CVEs you already know affect CURRENT (scanner, previous VEX run, RHSA tracker). Missing from the result can also mean “already fixed in CURRENT” — keep the allowlist tight.
 
 ---
@@ -401,10 +401,10 @@ jobs:
 
 | Source | Good for | Command / shape |
 | --- | --- | --- |
-| Installed RPMs | Use cases 1, 3, 8 | `rpm -qa --qf '%{NEVRA}\n'` |
-| Repo contents | Use cases 2, 7, 8 | `dnf repoquery --available --qf '%{NEVRA}'` |
+| Installed RPMs | Use cases 1, 3, 5 | `rpm -qa --qf '%{NEVRA}\n'` |
+| Repo contents | Use cases 2, 4, 5 | `dnf repoquery --available --qf '%{NEVRA}'` |
 | Pending upgrades | Use case 3 | `dnf repoquery --upgrades --qf '%{NEVRA}'` |
-| Satellite CV export | Use cases 7, 9 | hammer/API → NEVRA lines |
+| Satellite CV export | Use cases 4, 6 | hammer/API → NEVRA lines |
 | `dnf list` / `yum list` tables | — | **Not** parsed; convert to NEVRA first |
 
 ---
@@ -422,4 +422,4 @@ Each row means: for this `package`, CURRENT EVR is below the VEX `fixed_evr`, FU
 | `fixed_evr` | Fix NVR from VEX |
 | `product_stream` | RHEL/product stream id in VEX |
 
-Default `--product-prefix rhel-` limits fixes to RHEL product ids. Pass `--product-prefix ''` to include all products in the archive. Use a narrower prefix for EUS/AUS (use case 8).
+Default `--product-prefix rhel-` limits fixes to RHEL product ids. Pass `--product-prefix ''` to include all products in the archive. Use a narrower prefix for EUS/AUS (use case 5).
