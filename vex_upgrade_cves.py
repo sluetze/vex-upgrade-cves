@@ -76,6 +76,7 @@ class Fix:
     evr: Evr
     product_stream: str
     product_id: str
+    severity: str = ""
 
 
 # --- RPM version compare (RPM-compatible enough for EVR) -----------------
@@ -287,11 +288,13 @@ def iter_vex_docs_from_dir(root: Path) -> Iterator[dict]:
 
 
 def extract_fixes(doc: dict, product_prefix: str | None) -> list[Fix]:
-    tracking = (doc.get("document") or {}).get("tracking") or {}
+    document = doc.get("document") or {}
+    tracking = document.get("tracking") or {}
     cve = tracking.get("id") or ""
     if not cve.startswith("CVE-"):
         # fallback from filename-ish title
         return []
+    severity = ((document.get("aggregate_severity") or {}).get("text") or "").strip()
 
     vulns = doc.get("vulnerabilities") or []
     if not vulns:
@@ -325,6 +328,7 @@ def extract_fixes(doc: dict, product_prefix: str | None) -> list[Fix]:
                 evr=evr,
                 product_stream=rel.get("relates_to_product_reference") or "",
                 product_id=pid,
+                severity=severity,
             )
         )
     return fixes
@@ -409,6 +413,7 @@ def analyze(
                     {
                         "cve": cve,
                         "package": name,
+                        "severity": fix.severity,
                         "current_evr": str(cur.evr) if cur else None,
                         "future_evr": str(fut.evr),
                         "fixed_evr": str(fix.evr),

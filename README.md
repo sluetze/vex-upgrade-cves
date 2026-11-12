@@ -45,12 +45,16 @@ Step-by-step guides:
 
 1. **Host before/after update** — `rpm -qa` → update → `rpm -qa`, document CVEs fixed  
 2. **Repository before/after sync** — `dnf repoquery` snapshots around a mirror/content-view update  
-3. **Preview `dnf update`** — installed host vs would-be set after upgrades from a repo (no apply)
+3. **Preview `dnf update`** — installed host vs would-be set after upgrades from a repo (no apply)  
+7. **Satellite content view A→B** — compare two CV versions  
+8. **EUS/AUS streams** — pin repoids + `--product-prefix`  
+9. **CI gate** — fail if required / Critical CVEs are not fixed by FUTURE
 
 ## Result
 
 Each row = CVE + package fixed by FUTURE but not by CURRENT:
 
+- `severity` — VEX aggregate severity  
 - `current_evr` / `future_evr` — from your lists  
 - `fixed_evr` — first fixed NVR from VEX `product_status.fixed`  
 - `product_stream` / `product_id` — VEX relationship ids  
